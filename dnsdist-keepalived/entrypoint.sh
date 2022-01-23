@@ -15,7 +15,7 @@ fi
 > /var/log/messages
 rm -f /run/rsyslogd.pid && rsyslogd
 
-#start keepalived
+# start keepalived
 rm -rf /run/keepalived && keepalived
 # print logs
 tail +1 -f /var/log/messages &
