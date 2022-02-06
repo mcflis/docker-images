@@ -27,6 +27,9 @@ jobs:
       matrix:
         include:
           - registry: ghcr.io
+            context: dind-keepalived
+            image: dind-keepalived
+          - registry: ghcr.io
             context: dnsdist-keepalived
             image: dnsdist-keepalived
 
