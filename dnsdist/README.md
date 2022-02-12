@@ -14,8 +14,11 @@ Dnsdist will run with `--uid dnsdist --gid dnsdist` (see [Dockerfile](./Dockerfi
 ```bash
 docker build . -t dnsdist
 docker run -d \
+      --name dnsdist \
+      -p 15353:53/tcp \
+      -p 15353:53/udp \
       --restart always \
-      -v "/path/to/dnsdist.conf:/etc/dnsdist/dnsdist.conf:ro" \
+      -v "$(pwd)/example/dnsdist.conf:/etc/dnsdist/dnsdist.conf:ro" \
       dnsdist
 ```
 
