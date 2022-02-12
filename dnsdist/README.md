@@ -15,7 +15,6 @@ Dnsdist will run with `--uid dnsdist --gid dnsdist` (see [Dockerfile](./Dockerfi
 docker build . -t dnsdist
 docker run -d \
       --restart always \
-      --cap-add=NET_ADMIN \
       -v "/path/to/dnsdist.conf:/etc/dnsdist/dnsdist.conf:ro" \
       dnsdist
 ```
