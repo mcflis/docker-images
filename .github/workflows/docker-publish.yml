@@ -30,6 +30,9 @@ jobs:
             context: dind-keepalived
             image: dind-keepalived
           - registry: ghcr.io
+            context: dnsdist
+            image: dnsdist
+          - registry: ghcr.io
             context: dnsdist-keepalived
             image: dnsdist-keepalived
 
