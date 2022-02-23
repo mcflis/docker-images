@@ -35,6 +35,9 @@ jobs:
           - registry: ghcr.io
             context: dnsdist-keepalived
             image: dnsdist-keepalived
+          - registry: ghcr.io
+            context: dnspython
+            image: dnspython
 
     steps:
       - name: Checkout
