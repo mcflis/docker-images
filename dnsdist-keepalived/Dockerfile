@@ -6,7 +6,7 @@ ENV TZ=UTC
 
 USER root
 RUN apk add --no-cache --update bash keepalived rsyslog && \
-    mv /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.dist
+    (mv /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.dist || :)
 
 EXPOSE 53/tcp 53/udp
 VOLUME /etc/dnsdist/dnsdist.conf /etc/keepalived/keepalived.conf
