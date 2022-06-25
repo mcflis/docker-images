@@ -10,21 +10,15 @@ if [ -n "${NFS_TARGET}" ]; then
   sh -c "mount -o nolock -v ${NFS_TARGET} /mnt/restic"
 fi
 
-sh -c "restic snapshots ${RESTIC_INIT_ARGS} > /dev/null 2>&1"
-status=$?
-echo "Check Repo status $status"
-
-if [ $status != 0 ]; then
-  echo "Restic repository '${RESTIC_REPOSITORY}' does not exists. Running restic init."
-  sh -c "restic init ${RESTIC_INIT_ARGS}"
-
-  init_status=$?
-  echo "Repo init status $init_status"
-
-  if [ "$init_status" -ne 0 ]; then
+if ! sh -c "restic snapshots ${RESTIC_INIT_ARGS} > /dev/null 2>&1"; then
+  echo "Check Repo status $?"
+  echo "Restic repository '${RESTIC_REPOSITORY}' does not exist. Running restic init."
+  sh -c "restic init ${RESTIC_INIT_ARGS}" || {
     echo "Failed to init the repository: '${RESTIC_REPOSITORY}'"
     exit 1
-  fi
+  }
+else
+  echo "Found existing restic repository '${RESTIC_REPOSITORY}'."
 fi
 
 echo "Setup backup cron job with cron expression BACKUP_CRON: ${BACKUP_CRON}"
@@ -43,7 +37,7 @@ if [ -n "${BACKUP_CRON:-}" ]; then
     sh -c "$RUN_ON_STARTUP_BACKUP_CMDLINE"
   fi
   echo "Scheduling backup job according to cron expression."
-  # start the cron deamon
+  # start the cron daemon
   crond
 
   echo "Container started."
