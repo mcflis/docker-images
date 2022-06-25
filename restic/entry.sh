@@ -1,4 +1,4 @@
-#!bin/sh
+#!/usr/bin/env sh
 
 # original repo  : https://github.com/lobaro/restic-backup-docker
 # original source: https://github.com/lobaro/restic-backup-docker/blob/820fabb1e69a05eb329250dfcfe3f0ce8cecc81e/entry.sh
@@ -7,21 +7,21 @@ echo "Starting container ..."
 
 if [ -n "${NFS_TARGET}" ]; then
     echo "Mounting NFS based on NFS_TARGET: ${NFS_TARGET}"
-    mount -o nolock -v ${NFS_TARGET} /mnt/restic
+    sh -c "mount -o nolock -v ${NFS_TARGET} /mnt/restic"
 fi
 
-restic snapshots ${RESTIC_INIT_ARGS} &>/dev/null
+sh -c "restic snapshots ${RESTIC_INIT_ARGS} > /dev/null 2>&1"
 status=$?
 echo "Check Repo status $status"
 
 if [ $status != 0 ]; then
     echo "Restic repository '${RESTIC_REPOSITORY}' does not exists. Running restic init."
-    restic init ${RESTIC_INIT_ARGS}
+    sh -c "restic init ${RESTIC_INIT_ARGS}"
 
     init_status=$?
     echo "Repo init status $init_status"
 
-    if [ $init_status != 0 ]; then
+    if [ "$init_status" -ne 0 ]; then
         echo "Failed to init the repository: '${RESTIC_REPOSITORY}'"
         exit 1
     fi

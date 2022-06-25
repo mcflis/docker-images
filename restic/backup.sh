@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # original repo  : https://github.com/lobaro/restic-backup-docker
 # original source: https://github.com/lobaro/restic-backup-docker/blob/820fabb1e69a05eb329250dfcfe3f0ce8cecc81e/backup.sh
@@ -22,7 +22,7 @@ else
     echo "Pre-backup script not found ..."
 fi
 
-start=`date +%s`
+start=$(date +%s)
 rm -f ${lastLogfile} ${lastMailLogfile}
 echo "Starting Backup at $(date +"%Y-%m-%d %H:%M:%S")"
 echo "Starting Backup at $(date)" >> ${lastLogfile}
@@ -34,10 +34,10 @@ logLast "RESTIC_REPOSITORY: ${RESTIC_REPOSITORY}"
 logLast "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}"
 
 # Do not save full backup log to logfile but to backup-last.log
-restic backup /data ${RESTIC_JOB_ARGS} --tag=${RESTIC_TAG?"Missing environment variable RESTIC_TAG"} >> ${lastLogfile} 2>&1
+sh -c "restic backup /data ${RESTIC_JOB_ARGS} --tag=${RESTIC_TAG?"Missing environment variable RESTIC_TAG"} >> ${lastLogfile} 2>&1"
 backupRC=$?
 logLast "Finished backup at $(date)"
-if [[ $backupRC == 0 ]]; then
+if [ "$backupRC" -eq 0 ]; then
     echo "Backup Successful"
 else
     echo "Backup Failed with Status ${backupRC}"
@@ -45,12 +45,12 @@ else
     copyErrorLog
 fi
 
-if [[ $backupRC == 0 ]] && [ -n "${RESTIC_FORGET_ARGS}" ]; then
+if [ "$backupRC" -eq 0 ] && [ -n "${RESTIC_FORGET_ARGS}" ]; then
     echo "Forget about old snapshots based on RESTIC_FORGET_ARGS = ${RESTIC_FORGET_ARGS}"
-    restic forget ${RESTIC_FORGET_ARGS} >> ${lastLogfile} 2>&1
+    sh -c "restic forget ${RESTIC_FORGET_ARGS} >> ${lastLogfile} 2>&1"
     rc=$?
     logLast "Finished forget at $(date)"
-    if [[ $rc == 0 ]]; then
+    if [ "$rc" -eq 0 ]; then
         echo "Forget Successful"
     else
         echo "Forget Failed with Status ${rc}"
@@ -59,15 +59,14 @@ if [[ $backupRC == 0 ]] && [ -n "${RESTIC_FORGET_ARGS}" ]; then
     fi
 fi
 
-end=`date +%s`
+end=$(date +%s)
 echo "Finished Backup at $(date +"%Y-%m-%d %H:%M:%S") after $((end-start)) seconds"
 
 if [ -n "${TEAMS_WEBHOOK_URL}" ]; then
     teamsTitle="Restic Last Backup Log"
     teamsMessage=$( cat ${lastLogfile} | sed 's/"/\"/g' | sed "s/'/\'/g" | sed ':a;N;$!ba;s/\n/\n\n/g' )
     teamsReqBody="{\"title\": \"${teamsTitle}\", \"text\": \"${teamsMessage}\" }"
-    sh -c "curl -H 'Content-Type: application/json' -d '${teamsReqBody}' '${TEAMS_WEBHOOK_URL}' > ${lastMicrosoftTeamsLogfile} 2>&1"
-    if [ $? == 0 ]; then
+    if sh -c "curl -H 'Content-Type: application/json' -d '${teamsReqBody}' '${TEAMS_WEBHOOK_URL}' > ${lastMicrosoftTeamsLogfile} 2>&1"; then
         echo "Microsoft Teams notification successfully sent."
     else
         echo "Sending Microsoft Teams notification FAILED. Check ${lastMicrosoftTeamsLogfile} for further information."
@@ -75,8 +74,7 @@ if [ -n "${TEAMS_WEBHOOK_URL}" ]; then
 fi
 
 if [ -n "${MAILX_ARGS}" ]; then
-    sh -c "mailx -v -S sendwait ${MAILX_ARGS} < ${lastLogfile} > ${lastMailLogfile} 2>&1"
-    if [ $? == 0 ]; then
+    if sh -c "mailx -v -S sendwait ${MAILX_ARGS} < ${lastLogfile} > ${lastMailLogfile} 2>&1"; then
         echo "Mail notification successfully sent."
     else
         echo "Sending mail notification FAILED. Check ${lastMailLogfile} for further information."
