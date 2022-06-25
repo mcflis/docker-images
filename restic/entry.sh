@@ -28,14 +28,28 @@ if [ $status != 0 ]; then
 fi
 
 echo "Setup backup cron job with cron expression BACKUP_CRON: ${BACKUP_CRON}"
-echo "${BACKUP_CRON} /usr/bin/flock -n /var/run/backup.lock /bin/backup >> /var/log/cron.log 2>&1" >/var/spool/cron/crontabs/root
+RUN_ON_STARTUP_BACKUP_CMDLINE="/usr/bin/flock -n /var/run/backup.lock /bin/backup"
+BACKUP_CMDLINE="$RUN_ON_STARTUP_BACKUP_CMDLINE >> /var/log/cron.log 2>&1"
+BACKUP_CRONFILE=/var/spool/cron/crontabs/root
+echo "${BACKUP_CRON} sh -c '$BACKUP_CMDLINE'" > "$BACKUP_CRONFILE"
+echo "Backup cronline: $(cat "$BACKUP_CRONFILE")"
 
 # Make sure the file exists before we start tail
 touch /var/log/cron.log
 
-# start the cron deamon
-crond
+if [ -n "${BACKUP_CRON:-}" ]; then
+  if [ "${RUN_ON_STARTUP:-}" = "true" ]; then
+    echo "Executing backup on startup ..."
+    sh -c "$RUN_ON_STARTUP_BACKUP_CMDLINE"
+  fi
+  echo "Scheduling backup job according to cron expression."
+  # start the cron deamon
+  crond
 
-echo "Container started."
+  echo "Container started."
 
-exec "$@"
+  exec "$@"
+else
+  echo "ERROR: BACKUP_CRON cannot be empty"
+  exit 1
+fi

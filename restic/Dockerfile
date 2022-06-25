@@ -36,6 +36,8 @@ ENV OS_REGION_NAME=""
 ENV OS_INTERFACE=""
 ENV OS_IDENTITY_API_VERSION=3
 
+ENV RUN_ON_STARTUP="false"
+
 # openshift fix
 RUN mkdir /.cache && \
     chgrp -R 0 /.cache && \
