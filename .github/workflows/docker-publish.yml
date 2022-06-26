@@ -38,6 +38,9 @@ jobs:
           - registry: ghcr.io
             context: dnspython
             image: dnspython
+          - registry: ghcr.io
+            context: restic
+            image: restic
 
     steps:
       - name: Checkout
