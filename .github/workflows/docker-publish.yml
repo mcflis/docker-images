@@ -38,16 +38,31 @@ jobs:
           - registry: ghcr.io
             context: dnspython
             image: dnspython
+          - registry: ghcr.io
+            context: restic
+            image: restic
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Set up Docker QEMU
-        id: qemu
+        id: qemu-raw
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+
+      # TODO maybe drop this once https://github.com/mcflis/docker-images/pull/9 is merged
+      - name: Filter Docker QEMU platforms
+        id: qemu
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          #language=js
+          script: |
+            const platforms = '${{ steps.qemu-raw.outputs.platforms }}';
+            console.log('derived platforms from setup-qemu-action:', platforms);
+            core.setOutput('platforms', platforms.split(',').filter(p => !['linux/386', 'linux/arm/v6'].includes(p)).join(','));
 
       - name: Set up Docker Buildx
         id: buildx
