@@ -52,6 +52,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
 
+      # TODO maybe drop this once https://github.com/mcflis/docker-images/pull/9 is merged
       - name: Filter Docker QEMU platforms
         id: qemu
         uses: actions/github-script@v6
