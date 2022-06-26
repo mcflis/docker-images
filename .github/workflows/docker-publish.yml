@@ -60,6 +60,7 @@ jobs:
           #language=js
           script: |
             const platforms = '${{ steps.qemu-raw.outputs.platforms }}';
+            console.log('platforms', platforms);
             core.setOutput('platforms', platforms.split(',').filter(p => p !== 'linux/386').join(','));
 
       - name: Set up Docker Buildx
