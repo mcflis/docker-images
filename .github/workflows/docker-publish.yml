@@ -59,8 +59,8 @@ jobs:
           result-encoding: string
           #language=js
           script: |
-            console.log(core.getInput('steps'))
-            core.setOutput('platforms', 'linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7')
+            const platforms = '${{ steps.qemu-raw.outputs.platforms }}';
+            core.setOutput('platforms', platforms.split(',').filter(p => p !== 'linux/386').join(','));
 
       - name: Set up Docker Buildx
         id: buildx
